@@ -1,4 +1,8 @@
 <?php
+ini_set('xdebug.var_display_max_children', 128000 );//xdebug.var_display_max_children Type: integer, Default value: 128
+ini_set('xdebug.var_display_max_data', 512000 );//Type: integer, Default value: 512
+ini_set('xdebug.var_display_max_depth', 3000);//Type: integer, Default value: 3
+
 $reciver = new Reciver();
 $reciver->recive();
 
@@ -22,6 +26,7 @@ class Reciver
             '106' => 'rayi',
             '107' => 'weiphone',
             '108' => 'zoopda',
+            '109' => 'weimei',
         );
         $this->urls = array(
             '101' => 'diypda',
@@ -32,46 +37,36 @@ class Reciver
             '106' => 'rayi',
             '107' => 'weiphone',
             '108' => 'zoopda',
+            '109' => 'http://f1.avzcy.info/bbs/',
         );
     }
     
     public function recive()
     {
         if (!isset($_POST['data'])) {
-            echo 1001;
+            echo '1001';
             die();
         }
         $datas = json_decode($_POST['data']);
-        if (!is_array($datas)) {
-            echo 1002;
+        if (empty($datas)) {
+            echo '1002';
             die();
         }
-        
         
         $urls = array();
         if (isset($datas->type) && $datas->type == 'content') {
-           $thread = Thread::model()->findByAttributes(array("gid" => "{$datas->gid}"));
-           $thread->content = $datas->data->text;
-           $thread->status = 0;
-           try {
-                if($thread->save()) {
-                    echo "0";
-                } else {
-                    echo "1005";
-                }
-            } catch (Exception $e) {
-                if ($e->errorInfo[0] != 23000) {
-                    var_dump($e->getMessage());
-                }
+            if($this->updateThreadContent($datas->gid, $datas->data->text)) {
+                echo "0";
+            } else {
+                echo "1005";
             }
             die();
         }
         
-        foreach ($datas as $data) {
-            
-            if(!isset($data->title) || strlen($data->title) <= 5) {
-                continue;
-            }
+        foreach ($datas->data as $data) {
+            //if(!isset($data->title) || strlen($data->title) <= 3) {
+            //    continue;
+            //}
             
             $param['gid'] = isset($data->gid) ? $data->gid : '';
             $param['href'] = isset($data->href) ? $data->href : '';
@@ -82,8 +77,8 @@ class Reciver
             $param['reply_time'] = isset($data->reply_time) ? $data->reply_time : '';
             $param['site_id'] = isset($data->site_id) ? intval($data->site_id) : '';
             $param['site'] = isset($data->site_id) ? $this->sites[$data->site_id] : '';
-            if (strpos($param['title'], 'htt') !==0 ) {
-                $param['title'] = "{$this->urls[$param['site_id']]}{$param['title']}";
+            if (strpos($param['href'], 'htt') !==0 ) {
+                $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";
             }
             
     		if($this->insert($param)) {
@@ -113,4 +108,15 @@ class Reciver
         }
         return $result; 
     }
+    
+    private function updateThreadContent($gid, $content)
+    {
+        $sql = "UPDATE `dizwind` SET `content`=?, `status`=0 WHERE `gid`=?";
+        $stm = $this->db->prepare($sql);
+        $result = false;
+        if( $stm && $stm->execute(array($content, $gid))) {
+            $result = $stm->rowCount();
+        }
+    }
+    
 }

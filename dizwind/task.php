@@ -6,15 +6,16 @@ $task->task();
 
 class Task
 {
+    public $contentRate = 100;
     public function task()
     {
-        $task = $this->getThread();
-        $seed = mt_rand(1, 10);
-        if ($seed <= 2) {
-            $task = $this->getListTask();
-        } else {
+        $seed = mt_rand(1, 100);
+        if ($seed <= $this->contentRate) {
             $task = $this->getContentTask();
+        } else {
+            $task = $this->getListTask();
         }
+
         echo serialize($task);
         flush();
         $time = date('Y-m-d h:i:s');
@@ -22,7 +23,7 @@ class Task
         clearstatcache();
     }
 
-    private function getListTask() 
+    private function getListTask()
     {
         $cursor = @file_get_contents("cursor/list.latest");
         if (empty($cursor)) {
@@ -52,7 +53,7 @@ class Task
     
     private function getThread()
     {
-        $query = $this->db->prepare("SELECT * FROM `dizwind` WHERE status=1 ORDER BY id ASC limit 1");
+        $query = $this->db->prepare("SELECT * FROM `dizwind` WHERE `status`=1 ORDER BY `id` ASC limit 1");
         $query->execute();
         $thread = $query->fetch(); 
         return $thread;
@@ -77,6 +78,7 @@ class Task
         $options = 'localhost';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
+        /*
         $this->listTask[] = array(
             'type' => 'list',
             'site' => 'diypda',
@@ -186,6 +188,25 @@ class Task
             ),
             'endkey' => 'reply_time',
         );
+        $this->listTask[] = array(
+            'site' => 'zoopda',                                                 
+            'site_id' => '108',                                                    
+            'href' => array("http://bbs.zoopda.com/forum-54-%d.html", 1, 10, 1),   
+            'path' => "tbody[id^=normalthread_]",
+            'list' => array(
+                'href' => "j('th span[class=xst] a', 'href', -1)",
+                'title' => "j('th span[class=xst] a', 'innertext', -1)",                                                    
+                'author' => "j('p[class=mtn xg1] a', 'innertext')",
+                'action' => "j('th span[class=xst] font', 'innertext')",
+                'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
+                'reply_time' => "j('td em span', 'title')",
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            'endkey' => 'reply_time',
+        );
+        */
         /*
         $this->listTask[] = array(
             'site' => 'rayi',                                                 
@@ -225,23 +246,35 @@ class Task
             'endkey' => 'reply_time',
         );
         */
+        
         $this->listTask[] = array(
-            'site' => 'zoopda',                                                 
-            'site_id' => '108',                                                    
-            'href' => array("http://bbs.zoopda.com/forum-54-%d.html", 1, 10, 1),   
-            'path' => "tbody[id^=normalthread_]",
+            'site' => 'weimei',                                                 
+            'site_id' => '109',
+            'href' => array("http://f1.avzcy.info/bbs/forum-13-%d.html", 1, 1, 1),   
+            'path' => "form[name=moderate] div[class=spaceborder] table tr",
             'list' => array(
-                'href' => "j('th span[class=xst] a', 'href', -1)",
-                'title' => "j('th span[class=xst] a', 'innertext', -1)",                                                    
-                'author' => "j('p[class=mtn xg1] a', 'innertext')",
-                'action' => "j('th span[class=xst] font', 'innertext')",
+                'href' => "j('td[class=f_title] a', 'href')",
+                'title' => "j('td[class=f_title] a', 'innertext')",                                                    
+                //'author' => "j('td[class=f_author] a', 'innertext')",
+                //'action' => "j('th span[class=xst] font', 'innertext')",
                 'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
-                'reply_time' => "j('td em span', 'title')",
+                'reply_time' => "j('td[class=f_last] span a', 'innertext')",
                 'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
                 'site_id' => 's($this->task["site_id"])',
                 'site' => 's($this->task["site"])',
             ),
-            'endkey' => 'reply_time',
+            //'endkey' => 'reply_time',
+            'convert' => 'GBK',
+        );
+        
+        $this->contentTask['109'] = array(
+            'type' => 'content',
+            'site_id' => '109',
+            'site' => 'diypda',
+            'href' => '',
+            'gid' => '',
+            'content' => array('text' =>"j('div[class=t_msgfont]', 'innertext')"),
+            'convert' => 'GBK',
         );
     }
 }

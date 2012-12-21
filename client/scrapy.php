@@ -71,6 +71,9 @@ class Scrapy
     }
     
     function meetLatest($item) {
+        if (!isset($this->task['endkey'])) {
+            return false;
+        }
         if ($this->newEndKeyValue === null) {
             $this->newEndKeyValue = $item[$this->task['endkey']];
         }
@@ -98,12 +101,14 @@ class Scrapy
             return true;
         }
         $data = array();
+        /*
         if ($this->task['site'] == 'weiphone') {
             $count = 16;
             while($count--){
                 array_shift($this->listDom);
             }
         }
+        */
 
         foreach ($this->listDom as $list) {
             $this->listItem = $list;
@@ -117,11 +122,13 @@ class Scrapy
                 }
                 $item[$key] = $param_value;
             }
+
             if (!isset($item['reply_time']) || empty($item['reply_time'])) {
-                unset($item);
-                continue;
+                $this->log("no reply_time, unset", "error");
+                //unset($item);
+                //continue;
             }
-            
+
             if ($this->meetLatest($item)) {
                 break;
             }
@@ -275,7 +282,12 @@ class Scrapy
     function log($msg, $level='log') {
         $time = date('Y-m-d h:i:s');
         $msg = json_encode($msg);
-        @file_put_contents("log/{$this->site}.log", "$time $level {$msg}\r\n", FILE_APPEND);
+        if (empty($this->site)) {
+            $file = 'error';
+        } else {
+            $file = $this->site;
+        }
+        @file_put_contents("log/{$file}.log", "$time $level {$msg}\r\n", FILE_APPEND);
     }
     
     function save() {
@@ -286,27 +298,11 @@ class Scrapy
         $time_start = microtime(true);
         $result = $this->http_post($url, $this->list);
         var_dump($result);
+        $result = json_encode($result);
         $time_end  = microtime(true);
         $time = $time_end - $time_start;
-        $count = count($this->list);
+        $count = count($this->list['data']);
         $this->log("send data: $time : $count : $url : $result ", "profile");
-    }
-    
-    function post($url, $data) {
-        /*
-        $data = 'data=' . json_encode($data);
-        $time_start = microtime(true);
-        $ch = curl_init(); 
-        curl_setopt($ch, CURLOPT_URL,$url); 
-        curl_setopt($ch, CURLOPT_POST, 1); 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data); 
-        $result = curl_exec($ch);
-        curl_close($ch);
-        $time_end  = microtime(true);
-        $time = $time_end - $time_start;
-        $count = count($data);
-        $this->log("send data: $time : $count : $url ", "profile");
-        */
     }
     
     function http_post ($url, $data)
@@ -336,7 +332,7 @@ class Scrapy
     
     function getTask() {
         $url = $this->server . '/task.php';
-        $a_task = file_get_contents($url);
+        $a_task = @file_get_contents($url);
         $task = unserialize($a_task);
         if (!empty($task) && is_array($task)) {
             $this->task = $task;
