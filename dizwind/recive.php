@@ -23,6 +23,16 @@ class Reciver
             '107' => 'weiphone',
             '108' => 'zoopda',
         );
+        $this->urls = array(
+            '101' => 'diypda',
+            '102' => 'maxpda',
+            '103' => 'hiapk',
+            '104' => 'in189',
+            '105' => 'gfan',
+            '106' => 'rayi',
+            '107' => 'weiphone',
+            '108' => 'zoopda',
+        );
     }
     
     public function recive()
@@ -36,7 +46,27 @@ class Reciver
             echo 1002;
             die();
         }
-        $datas[] = array();
+        
+        
+        $urls = array();
+        if (isset($datas->type) && $datas->type == 'content') {
+           $thread = Thread::model()->findByAttributes(array("gid" => "{$datas->gid}"));
+           $thread->content = $datas->data->text;
+           $thread->status = 0;
+           try {
+                if($thread->save()) {
+                    echo "0";
+                } else {
+                    echo "1005";
+                }
+            } catch (Exception $e) {
+                if ($e->errorInfo[0] != 23000) {
+                    var_dump($e->getMessage());
+                }
+            }
+            die();
+        }
+        
         foreach ($datas as $data) {
             
             if(!isset($data->title) || strlen($data->title) <= 5) {
@@ -52,6 +82,9 @@ class Reciver
             $param['reply_time'] = isset($data->reply_time) ? $data->reply_time : '';
             $param['site_id'] = isset($data->site_id) ? intval($data->site_id) : '';
             $param['site'] = isset($data->site_id) ? $this->sites[$data->site_id] : '';
+            if (strpos($param['title'], 'htt') !==0 ) {
+                $param['title'] = "{$this->urls[$param['site_id']]}{$param['title']}";
+            }
             
     		if($this->insert($param)) {
     			    echo "0";

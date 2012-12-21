@@ -29,11 +29,16 @@ class Scrapy
             $this->scrapyed = array();
         }
         
-        if (!isset($this->task['url']) || empty($this->task['url'])) {
-            list($href, $start, $end, $step) = $this->task['href'];
-            for($i=$start; $i<=$end; $i=$i+$step) {
-                $this->task['url'][] = sprintf($href, $i);
+        //by comment
+        if ($this->task['type'] == 'list') {
+            if (!isset($this->task['url']) || empty($this->task['url'])) {
+                list($href, $start, $end, $step) = $this->task['href'];
+                for($i=$start; $i<=$end; $i=$i+$step) {
+                    $this->task['url'][] = sprintf($href, $i);
+                }
             }
+        } else {
+            $this->task['url'][] = $this->task['href'];
         }
         
         foreach ($this->task['url'] as $url) {
@@ -49,9 +54,16 @@ class Scrapy
         $this->url = $url;
         $this->list = array();
         $this->html = $this->getHtml();
-        $this->listDom = $this->html->find($this->task['path']);
-        $this->getData();                                          
-        $this->getListData();
+        
+        //by comment
+        if ($this->task['type'] == 'list') {
+            $this->listDom = $this->html->find($this->task['path']);
+            $this->getListData();
+        } elseif ($this->task['type'] == 'content') {
+            $this->listItem = $this->html;
+            $this->getContentData();
+        }
+    
         $this->save();
         unset($this->list);
         unset($this->xpath);
@@ -78,11 +90,8 @@ class Scrapy
         return $this->isLatest;
     }
     
-    function getData() {
-
-    }
-    
     function getListData() {
+        $this->list['data'] = array();
         $listItems = $this->task['list'];
         if ($this->listDom == null) {
             $this->log("get dom file: $this->url", "error");
@@ -95,6 +104,7 @@ class Scrapy
                 array_shift($this->listDom);
             }
         }
+
         foreach ($this->listDom as $list) {
             $this->listItem = $list;
             $item = array();
@@ -111,9 +121,11 @@ class Scrapy
                 unset($item);
                 continue;
             }
+            
             if ($this->meetLatest($item)) {
                 break;
             }
+
             if (isset($this->task['hook']) && !empty($this->task['hook']) && function_exists($this->task['hook'])) {
                 $this->task['hook']($item, $this->task);
             }
@@ -128,31 +140,65 @@ class Scrapy
             $data[$item['thread_id']] = $item;
             unset($item);
         }
-        $this->list = array_merge($this->list, $data);
+        $this->list['type'] = $this->task['type'];
+        $this->list['data'] = array_merge($this->list['data'], $data);
         unset($data);
     }
+    
+    function getContentData() {
+        if (!isset($this->task['content'])) {
+            return ;
+        }
+        foreach ($this->task['content'] as $param => $method) {
+            $param_value = null;
+            $fun = "\$param_value = \$this->$method;";
+            eval($fun);
+            if (isset($this->task['convert']) && $this->task['convert']) {
+                $param_value = mb_convert_encoding($param_value, 'UTF-8', $this->task['convert']);
+            }
+            $item[$param] = $param_value;
+        }
+        $this->list['gid'] = $this->task['gid'];
+        $this->list['type'] = $this->task['type'];
+        $this->list['data'] = $item;
+        unset($item);
+    }
+    
     function getHtml() {
         $time_start = microtime(true);
+
+        // by comment
+        //$header = '';
+        //$header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
+        /*
+        $header .= "Accept-Encoding: gzip, deflate\r\n";
+        $header .= "Accept-Language: en-us,en;q=0.5\r\n";
+        $header .= "Connection: keep-alive\r\n";
+        $header .= "Host: oabt.org\r\n";
+        $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
+        
+        $html = file_get_contents("{$this->url}", false, stream_context_create(
+                    array 
+                    (
+                        'http'=>array(
+                            'protocol_version'=>'1.1',
+                            'method' => "GET", 
+                            'header' => $header,
+                        )
+                    )
+               )
+        );
+        */
+
+
         $header[0] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
         $header[] = "Host: www.baidu.com";
         $header[] = "User-Agent: Mozilla/5.0 (Windows NT 6.2; rv:13.0) Gecko/20100101 Firefox/13.0.1";
         $header[] = "Accept-Language: zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3";
         $header[] = "Accept-Encoding: gzip, deflate";
         $header[] = "Connection: keep-alive";
-        /*
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->url);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.2; rv:13.0) Gecko/20100101 Firefox/13.0.1');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($ch, CURLOPT_FAILONERROR, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        //$html = curl_exec($ch);
-        */
-        $html = file_get_contents($this->url);
-        
+
+        $html = file_get_contents("{$this->url}");
         if (!$html) {
             $error = "get url failded:" .$this->url . ":" . var_export($html);
             $this->log($error, 'error');
@@ -172,24 +218,36 @@ class Scrapy
     
     function getXpath($url) {
         $time_start = microtime(true);
+    
+        //by comment
+        //$header = '';
+        //$header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
+        /*
+        $header .= "Accept-Encoding: gzip, deflate\r\n";
+        $header .= "Accept-Language: en-us,en;q=0.5\r\n";
+        $header .= "Connection: keep-alive\r\n";
+        $header .= "Host: oabt.org\r\n";
+        $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
+        $html = file_get_contents("compress.zlib://http://oabt.org", false, stream_context_create(
+                    array 
+                    (
+                        'http'=>array(
+                            'protocol_version'=>'1.1',
+                            'method' => "GET", 
+                            'header' => $header,
+                        )
+                    )
+               )
+        );
+        */
+        
         $header[0] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
         $header[] = "Host: www.baidu.com";
         $header[] = "User-Agent: Mozilla/5.0 (Windows NT 6.2; rv:13.0) Gecko/20100101 Firefox/13.0.1";
         $header[] = "Accept-Language: zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3";
         $header[] = "Accept-Encoding: gzip, deflate";
         $header[] = "Connection: keep-alive";
-        /*
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,$url);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.2; rv:13.0) Gecko/20100101 Firefox/13.0.1');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($ch, CURLOPT_FAILONERROR, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        //$html = curl_exec($ch);
-        */
+
         $html  = file_get_contents($url);
         if (!$html) {
             $error = "<br />cURL error number:" .curl_errno($ch) . ":" . curl_error($ch);

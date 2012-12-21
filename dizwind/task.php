@@ -1,5 +1,6 @@
 <?php 
-$task[] = array(
+$list[] = array(
+    'type' => 'list',
     'site' => 'diypda',
     'site_id' => '101',
     'href' => array("http://www.diypda.com/forum-24-%d.html", 1, 10, 1),   
@@ -18,7 +19,18 @@ $task[] = array(
     'endkey' => 'reply_time',
     'convert' => 'GBK',
 );
-$task[] = array(
+
+$content[] = array(
+    'type' => 'content',
+    'site_id' => '101',
+    'site' => 'diypda',
+    'href' => $thread->href,
+    'gid' => $thread->gid,
+    'content' => array('text' =>"j('div[class=t_msgfont]', 'innertext')"),
+    'convert' => 'GBK',
+);
+
+$list[] = array(
     'site' => 'maxpda',                                                  
     'site_id' => '102',                                                    
     'href' => array("http://bbs.maxpda.com/forum-44-%d.html", 1, 10, 1),   
@@ -37,7 +49,7 @@ $task[] = array(
     'endkey' => 'reply_time',
     'convert' => 'GBK',
 );
-$task[] = array(
+$list[] = array(
     'site' => 'hiapk',                                                    
     'site_id' => '103',                                                    
     'href' => array("http://bbs.hiapk.com/forum-187-%d.html", 1, 10, 1),   
@@ -57,7 +69,7 @@ $task[] = array(
     'endkey' => 'reply_time',
     'convert' => 'GBK',
 );
-$task[] = array(
+$list[] = array(
     'site' => 'in189',                                                    
     'site_id' => '104',                                                    
     'href' => array("http://www.in189.com/forum-200-%d.html", 1, 10, 1),
@@ -76,7 +88,7 @@ $task[] = array(
     'endkey' => 'reply_time',
     'convert' => 'GBK',
 );
-$task[] = array(
+$list[] = array(
     'site' => 'gfan',                                                 
     'site_id' => '105',                                                    
     'href' => array("http://bbs.gfan.com/forum-23-%d.html", 1, 10, 1),   
@@ -95,7 +107,7 @@ $task[] = array(
     'endkey' => 'reply_time',
 );
 /*
-$task[] = array(
+$list[] = array(
     'site' => 'rayi',                                                 
     'site_id' => '106',                                                    
     'href' => array("http://bbs.rayi.cn/forum-34-%d.html", 1, 10, 1),   
@@ -114,7 +126,7 @@ $task[] = array(
     'endkey' => 'reply_time',
 );
 
-$task[] = array(
+$list[] = array(
     'site' => 'weiphone',                                                 
     'site_id' => '107',                                                    
     'href' => array("http://bbs.weiphone.com/thread-htm-fid-29-page-%d.html", 1, 10, 1),   
@@ -133,7 +145,7 @@ $task[] = array(
     'endkey' => 'reply_time',
 );
 */
-$task[] = array(
+$list[] = array(
     'site' => 'zoopda',                                                 
     'site_id' => '108',                                                    
     'href' => array("http://bbs.zoopda.com/forum-54-%d.html", 1, 10, 1),   
@@ -156,9 +168,9 @@ $cursor = @file_get_contents("cursor/task.txt");
 if (empty($cursor)) {
     $cursor = 0;
 } else {
-    $cursor = $cursor % count($task);
+    $cursor = $cursor % count($list);
 }
-$a_task = serialize($task[$cursor]);
+$a_task = serialize($list[$cursor]);
 echo $a_task;
 flush();
 $time = date('Y-m-d h:i:s');
