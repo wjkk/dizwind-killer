@@ -18,8 +18,6 @@ class Scrapy
         ini_set('default_socket_timeout', 120);
         $this->task = null;
         $this->getTask();
-        var_dump($this->task);
-        die();
         $this->site = $this->task['site'];
         $this->isLatest = false;
         $this->newEndKeyValue = null;
@@ -53,8 +51,8 @@ class Scrapy
         $this->html = $this->getHtml();
         $this->listDom = $this->html->find($this->task['path']);
         $this->getData();                                          
-        $this->getListData();                                      
-        $this->save();                                            
+        $this->getListData();
+        $this->save();
         unset($this->list);
         unset($this->xpath);
         unset($this->listDom);
@@ -219,14 +217,14 @@ class Scrapy
     function log($msg, $level='log') {
         $time = date('Y-m-d h:i:s');
         $msg = json_encode($msg);
-        @file_put_contents("log/{$this->site}.log", "$time $level {$msg}\n", FILE_APPEND);
+        @file_put_contents("log/{$this->site}.log", "$time $level {$msg}\r\n", FILE_APPEND);
     }
     
     function save() {
         if(empty($this->list)) {
             exit();
         }
-        $url = $this->server . '/index/recive';
+        $url = $this->server . '/recive.php';
         $time_start = microtime(true);
         $result = $this->http_post($url, $this->list);
         var_dump($result);
