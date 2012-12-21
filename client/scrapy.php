@@ -11,13 +11,15 @@ class Scrapy
     public $isLatest = false;
     public $endKeyValue = null;
     public $newEndKeyValue = null;
-    public $server = "http://www.wuzeren.com";
+    public $server = "http://localhost/dizwind";
         
     function run() {
         set_time_limit(120);
         ini_set('default_socket_timeout', 120);
         $this->task = null;
         $this->getTask();
+        var_dump($this->task);
+        die();
         $this->site = $this->task['site'];
         $this->isLatest = false;
         $this->newEndKeyValue = null;
