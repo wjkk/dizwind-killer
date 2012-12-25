@@ -27,6 +27,7 @@ class Reciver
             '107' => 'weiphone',
             '108' => 'zoopda',
             '109' => 'weimei',
+            '110' => 'oabt',
         );
         $this->urls = array(
             '101' => 'diypda',
@@ -38,6 +39,7 @@ class Reciver
             '107' => 'weiphone',
             '108' => 'zoopda',
             '109' => 'http://f1.avzcy.info/bbs/',
+            '110' => 'http://oabt.org/',
         );
     }
     
@@ -77,6 +79,10 @@ class Reciver
             $param['reply_time'] = isset($data->reply_time) ? $data->reply_time : '';
             $param['site_id'] = isset($data->site_id) ? intval($data->site_id) : '';
             $param['site'] = isset($data->site_id) ? $this->sites[$data->site_id] : '';
+            $param['mag'] = isset($data->mag) ? $data->mag : '';
+            $param['ed2k'] = isset($data->ed2k) ? $data->ed2k : '';
+            $param['duration'] = isset($data->duration) ? $data->duration : '';
+            $param['file_size'] = isset($data->file_size) ? $data->file_size : '';
             if (strpos($param['href'], 'htt') !==0 ) {
                 $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";
             }

@@ -6,7 +6,7 @@ $task->task();
 
 class Task
 {
-    public $contentRate = 100;
+    public $contentRate = 0;
     public function task()
     {
         $seed = mt_rand(1, 100);
@@ -245,7 +245,7 @@ class Task
             ),
             'endkey' => 'reply_time',
         );
-        */
+
         
         $this->listTask[] = array(
             'site' => 'weimei',                                                 
@@ -275,6 +275,31 @@ class Task
             'gid' => '',
             'content' => array('text' =>"j('div[class=t_msgfont]', 'innertext')"),
             'convert' => 'GBK',
+        );
+        */
+        
+        $this->listTask[] = array(
+            'site' => 'oabt',
+            'site_id' => '110',
+            'host'     => 'oabt.org',
+            'compress' => 'compress.zlib://',
+            'href' => array("http://oabt.org/index.php?page=%d", 2, 455, 1),
+            'path' => "tbody[onmouseover]",
+            'list' => array(
+                'href' => "j('a[target=_blank]', 'href')",
+                'title' => "j('a[target=_blank]', 'innertext')",
+                'thread_id' => "j('a[target=_blank]', 'rel')",
+                'mag' => "j('a[class=magDown]', 'href')",
+                'ed2k' => "a('a[class=ed2kDown], a[class=ed2kNone]', 'ed2k')",
+                'duration' => "j('td[class=capacity],td[class=time]', 'innertext')",
+                'file_size' => "j('td[class=seed]', 'innertext')",
+                'action' => "j('a[class=sbule]', 'innertext')",
+                //'action_url' => "j('a[class=sbule]', 'href')",
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            //'endkey' => 'reply_time'
         );
     }
 }

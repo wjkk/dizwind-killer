@@ -1,6 +1,6 @@
 <?php 
 date_default_timezone_set("Asia/Shanghai");
-set_time_limit(0);
+//set_time_limit(0);
 require_once("simple_html_dom.php");
 class Scrapy 
 {
@@ -14,7 +14,7 @@ class Scrapy
     public $server = "http://localhost/dizwind";
         
     function run() {
-        set_time_limit(120);
+        set_time_limit(0);
         ini_set('default_socket_timeout', 120);
         $this->task = null;
         $this->getTask();
@@ -124,7 +124,7 @@ class Scrapy
             }
 
             if (!isset($item['reply_time']) || empty($item['reply_time'])) {
-                $this->log("no reply_time, unset", "error");
+                $this->log("no reply_time, did not unset", "error");
                 //unset($item);
                 //continue;
             }
@@ -173,18 +173,22 @@ class Scrapy
     
     function getHtml() {
         $time_start = microtime(true);
-
-        // by comment
-        //$header = '';
-        //$header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
-        /*
+        
+        $header = '';
+        $header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
         $header .= "Accept-Encoding: gzip, deflate\r\n";
         $header .= "Accept-Language: en-us,en;q=0.5\r\n";
         $header .= "Connection: keep-alive\r\n";
-        $header .= "Host: oabt.org\r\n";
+        if (isset($this->task['host']) && $this->task['host']) {
+            $header .= "Host: {$this->task['host']}\r\n";
+        } else {
+            $header .= "Host: www.baidu.com\r\n";
+        }
         $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
-        
-        $html = file_get_contents("{$this->url}", false, stream_context_create(
+        if (isset($this->task['compress']) && $this->task['compress']) {
+            $this->url = "compress.zlib://{$this->url}";
+        }
+        $html = file_get_contents($this->url, false, stream_context_create(
                     array 
                     (
                         'http'=>array(
@@ -195,17 +199,18 @@ class Scrapy
                     )
                )
         );
-        */
 
-
-        $header[0] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+        
+        //$header[0] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+        /*
         $header[] = "Host: www.baidu.com";
         $header[] = "User-Agent: Mozilla/5.0 (Windows NT 6.2; rv:13.0) Gecko/20100101 Firefox/13.0.1";
         $header[] = "Accept-Language: zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3";
         $header[] = "Accept-Encoding: gzip, deflate";
         $header[] = "Connection: keep-alive";
-
         $html = file_get_contents("{$this->url}");
+        */
+
         if (!$html) {
             $error = "get url failded:" .$this->url . ":" . var_export($html);
             $this->log($error, 'error');
@@ -344,6 +349,16 @@ class Scrapy
             }
         }
     }
+
+    function a($path, $para, $posi = 0) {
+        $a = $this->listItem->find($path, $posi);
+        if (is_object($a)) {
+            return $a->getAttribute($para);
+        } else {
+            return '';
+        }
+    }
+
     function j($path, $para, $posi = 0) {
         $a = $this->listItem->find($path, $posi);
         if (is_object($a)) {
