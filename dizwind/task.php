@@ -78,7 +78,6 @@ class Task
         $options = 'localhost';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
-        /*
         $this->listTask[] = array(
             'type' => 'list',
             'site' => 'diypda',
@@ -87,11 +86,10 @@ class Task
             'path' => "tbody[id^=normalthread_]",                                              
             'list' => array(
                 'href' => "j('th a[class=xst]', 'href')",
-                'title' => "j('th a[class=xst]', 'innertext')",                                                           
-                'author' => "j('cite a', 'innertext')",
-                'action' => "j('th font', 'innertext')",
-                'thread_id' => 'r("/tid=([0-9]+)&/", $item["href"])',
-                'reply_time' => "j('em span', 'title', -1)",   
+                'title' => "j('th a[class=xst]', 'innertext')",
+                'author' => "j('td cite a', 'innertext', -1)",
+                'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
+                'reply_time' => "j('a span', 'title', -1)",
                 'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
                 'site_id' => 's($this->task["site_id"])',
                 'site' => 's($this->task["site"])',
@@ -206,8 +204,6 @@ class Task
             ),
             'endkey' => 'reply_time',
         );
-        */
-        /*
         $this->listTask[] = array(
             'site' => 'rayi',                                                 
             'site_id' => '106',                                                    
@@ -276,7 +272,6 @@ class Task
             'content' => array('text' =>"j('div[class=t_msgfont]', 'innertext')"),
             'convert' => 'GBK',
         );
-        */
         
         $this->listTask[] = array(
             'site' => 'oabt',
