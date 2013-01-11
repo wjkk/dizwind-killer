@@ -20,13 +20,16 @@ class Scrapy
         $this->getParserTask();
         $dom_html = str_get_html($this->task['content']);
         $images = $dom_html->find("img[onload]");
-        $this->pics = array();
         foreach ($images as $img) {
             if (isset($img->src)) {
                 $src = $img->src;
-                $file_path = "pic/" . $this->task['gid'] . '-' . md5($src) . '.' . strtolower(trim(substr(strrchr($src, '.'), 1)));
-                file_put_contents($file_path, file_get_contents($src));
-                $this->data['pics'][] = $file_path;
+                $tmp = explode ('/', $src);
+                $filename = array_pop($tmp);
+                $file_path = "pic/" . $this->task['gid'] . '-' . md5($src) . '-' . $filename;
+                file_put_contents($file_path, @file_get_contents($src));
+                $image['new'] = $file_path;
+                $image['old'] = $src;
+                $this->data['pics'][] = $image;
             }
         }
         $this->sendParser();
@@ -335,18 +338,19 @@ class Scrapy
     }
     
     function sendParser() {
+        $this->data['gid'] = $this->task['gid'];
         if(empty($this->data)) {
             exit();
         }
-        $url = $this->server . '/parser.php?recive';
+        $url = $this->server . '/parser.php?a=recive';
         $time_start = microtime(true);
         $result = $this->http_post($url, $this->data);
         var_dump($result);
         $result = json_encode($result);
         $time_end  = microtime(true);
         $time = $time_end - $time_start;
-        $count = count($this->list['data']);
-        $this->log("send data: $time : $count : $url : $result ", "profile");
+        //$count = count($this->data['pics']);
+        $this->log("send data: $time : $url : $result ", "profile");
     }
     
     function http_post ($url, $data)
@@ -375,7 +379,7 @@ class Scrapy
     }
     
     function getParserTask() {
-        $url = $this->server . '/parser.php?get';
+        $url = $this->server . '/parser.php?a=get';
         $a_task = @file_get_contents($url);
         $task = unserialize($a_task);
         if (!empty($task) && is_array($task)) {
