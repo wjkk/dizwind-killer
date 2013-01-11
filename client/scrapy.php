@@ -174,32 +174,37 @@ class Scrapy
     function getHtml() {
         $time_start = microtime(true);
         
-        $header = '';
-        $header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
-        $header .= "Accept-Encoding: gzip, deflate\r\n";
-        $header .= "Accept-Language: en-us,en;q=0.5\r\n";
-        $header .= "Connection: keep-alive\r\n";
-        if (isset($this->task['host']) && $this->task['host']) {
-            $header .= "Host: {$this->task['host']}\r\n";
+        if (isset($this->task['cleanrequest']) && $this->task['cleanrequest']) {
+            $html = file_get_contents($this->url);
         } else {
-            $header .= "Host: www.baidu.com\r\n";
-        }
-        $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
-        if (isset($this->task['compress']) && $this->task['compress']) {
-            $this->url = "compress.zlib://{$this->url}";
-        }
-        $html = file_get_contents($this->url, false, stream_context_create(
-                    array 
-                    (
-                        'http'=>array(
-                            'protocol_version'=>'1.1',
-                            'method' => "GET", 
-                            'header' => $header,
+            $header = '';
+            $header .= "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
+            $header .= "Accept-Encoding: gzip, deflate\r\n";
+            $header .= "Accept-Language: en-us,en;q=0.5\r\n";
+            $header .= "Connection: keep-alive\r\n";
+            if (isset($this->task['host']) && $this->task['host']) {
+                $header .= "Host: {$this->task['host']}\r\n";
+            } else {
+                $header .= "Host: www.baidu.com\r\n";
+            }
+            $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
+            if (isset($this->task['compress']) && $this->task['compress']) {
+                $this->url = "compress.zlib://{$this->url}";
+            }
+            
+            $html = file_get_contents($this->url, false, stream_context_create(
+                        array 
+                        (
+                            'http'=>array(
+                                'protocol_version'=>'1.1',
+                                'method' => "GET", 
+                                'header' => $header,
+                            )
                         )
-                    )
-               )
-        );
-
+                   )
+            );
+            
+        }
         
         //$header[0] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
         /*
@@ -315,7 +320,7 @@ class Scrapy
         $send_data['data'] = json_encode($data);
         $data_url = http_build_query ($send_data);
         $data_len = strlen ($data_url);
-    
+        
         return array (
             'content' =>file_get_contents 
             (

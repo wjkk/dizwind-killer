@@ -79,17 +79,16 @@ class Task
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
         $this->listTask[] = array(
-            'type' => 'list',
             'site' => 'diypda',
             'site_id' => '101',
-            'href' => array("http://www.diypda.com/forum-24-%d.html", 1, 10, 1),   
+            'href' => array("http://tzsc.diypda.com/forum.php?mod=forumdisplay&fid=24&sortid=81&ortid=81&sortid=81&page=%d", 1, 10, 1),   
             'path' => "tbody[id^=normalthread_]",                                              
             'list' => array(
                 'href' => "j('th a[class=xst]', 'href')",
                 'title' => "j('th a[class=xst]', 'innertext')",
                 'author' => "j('td cite a', 'innertext', -1)",
                 'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
-                'reply_time' => "j('a span', 'title', -1)",
+                'reply_time' => "j('em a span', 'title')", 
                 'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
                 'site_id' => 's($this->task["site_id"])',
                 'site' => 's($this->task["site"])',
@@ -295,6 +294,63 @@ class Task
                 'site' => 's($this->task["site"])',
             ),
             //'endkey' => 'reply_time'
+        );
+        
+        
+        $this->listTask[] = array(
+            'site' => '1lou',
+            'site_id' => '111',
+            'host'     => 'http://bbs.1lou.com',
+            //'compress' => 'compress.zlib://', 
+            'cleanrequest' => true,
+            'href' => array("http://bbs.1lou.com/forum-62-%d.html", 1, 1, 1), 
+            'path' => "tbody[id^=normalthread_]",                                
+            'list' => array(
+                'href' => "j('th a[class=xst]', 'href')",
+                'title' => "j('th a[class=xst]', 'innertext')",                                                         
+                'author' => "j('td cite a', 'innertext')",
+                'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
+                'reply_time' => "j('a span', 'title', -1)",
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            //'endkey' => 'reply_time',
+            'convert' => 'GBK',
+        );
+        
+        
+        $this->listTask[] = array(
+            'site' => '1lou',
+            'site_id' => '111',
+            'host'     => 'http://bbs.1lou.com',
+            //'compress' => 'compress.zlib://', 
+            'cleanrequest' => true,
+            'href' => array("http://bbs.1lou.com/forum-558-%d.html", 1, 1, 1),
+            'path' => "tbody[id^=normalthread_]",                                
+            'list' => array(
+                'href' => "j('th a[class=xst]', 'href')",
+                'title' => "j('th a[class=xst]', 'innertext')",                                                         
+                'author' => "j('td cite a', 'innertext')",
+                'thread_id' => 'r("/thread-([0-9]+)-/", $item["href"])',
+                'reply_time' => "j('a span', 'title', -1)",
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            //'endkey' => 'reply_time',
+            'convert' => 'GBK',
+        );
+        
+        $this->contentTask['111'] = array(
+            'type' => 'content',
+            'site_id' => '111',
+            'site' => '1lou',
+            'cleanrequest' => true,
+            'href' => '',
+            'gid' => '',
+            'content' => array('text' =>"j('div[class=pct]', 'innertext')"),
+            'convert' => 'GBK',
         );
     }
 }
