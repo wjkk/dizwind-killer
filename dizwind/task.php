@@ -6,7 +6,7 @@ $task->task();
 
 class Task
 {
-    public $contentRate = 0;
+    public $contentRate = 90; 
     public function task()
     {
         $seed = mt_rand(1, 100);
@@ -53,7 +53,8 @@ class Task
     
     private function getThread()
     {
-        $query = $this->db->prepare("SELECT * FROM `dizwind` WHERE `status`=1 ORDER BY `id` ASC limit 1");
+        //$query = $this->db->prepare("SELECT * FROM `dizwind` WHERE `status`=1 ORDER BY `id` DESC limit 1");
+        $query = $this->db->prepare("SELECT * FROM `dizwind` WHERE `status`=1 AND site_id=111 ORDER BY RAND() DESC limit 1");
         $query->execute();
         $thread = $query->fetch(); 
         return $thread;
@@ -75,10 +76,10 @@ class Task
         $dbname = 'test';
         $username = 'root';
         $password = '';
-        $options = 'localhost';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
         $this->listTask[] = array(
+            'type' => 'list',
             'site' => 'diypda',
             'site_id' => '101',
             'href' => array("http://tzsc.diypda.com/forum.php?mod=forumdisplay&fid=24&sortid=81&ortid=81&sortid=81&page=%d", 1, 10, 1),   
@@ -240,7 +241,7 @@ class Task
             ),
             'endkey' => 'reply_time',
         );
-
+        
         
         $this->listTask[] = array(
             'site' => 'weimei',                                                 
@@ -277,7 +278,7 @@ class Task
             'site_id' => '110',
             'host'     => 'oabt.org',
             'compress' => 'compress.zlib://',
-            'href' => array("http://oabt.org/index.php?page=%d", 2, 455, 1),
+            'href' => array("http://oabt.org/index.php?page=%d", 1, 2, 1),
             'path' => "tbody[onmouseover]",
             'list' => array(
                 'href' => "j('a[target=_blank]', 'href')",
@@ -349,7 +350,7 @@ class Task
             'cleanrequest' => true,
             'href' => '',
             'gid' => '',
-            'content' => array('text' =>"j('div[class=pct]', 'innertext')"),
+            'content' => array('text' =>"j('td[class=t_f]', 'innertext')"),
             'convert' => 'GBK',
         );
     }

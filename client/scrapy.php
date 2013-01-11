@@ -11,8 +11,27 @@ class Scrapy
     public $isLatest = false;
     public $endKeyValue = null;
     public $newEndKeyValue = null;
-    public $server = "http://localhost/dizwind";
+    public $server = "http://www.faniao.com/dizwind";
         
+    function parser() {
+        set_time_limit(0);
+        ini_set('default_socket_timeout', 120);
+        $this->task = null;
+        $this->getParserTask();
+        $dom_html = str_get_html($this->task['content']);
+        $images = $dom_html->find("img[onload]");
+        $this->pics = array();
+        foreach ($images as $img) {
+            if (isset($img->src)) {
+                $src = $img->src;
+                $file_path = "pic/" . $this->task['gid'] . '-' . md5($src) . '.' . strtolower(trim(substr(strrchr($src, '.'), 1)));
+                file_put_contents($file_path, file_get_contents($src));
+                $this->data['pics'][] = $file_path;
+            }
+        }
+        $this->sendParser();
+    }
+    
     function run() {
         set_time_limit(0);
         ini_set('default_socket_timeout', 120);
@@ -315,6 +334,21 @@ class Scrapy
         $this->log("send data: $time : $count : $url : $result ", "profile");
     }
     
+    function sendParser() {
+        if(empty($this->data)) {
+            exit();
+        }
+        $url = $this->server . '/parser.php?recive';
+        $time_start = microtime(true);
+        $result = $this->http_post($url, $this->data);
+        var_dump($result);
+        $result = json_encode($result);
+        $time_end  = microtime(true);
+        $time = $time_end - $time_start;
+        $count = count($this->list['data']);
+        $this->log("send data: $time : $count : $url : $result ", "profile");
+    }
+    
     function http_post ($url, $data)
     {
         $send_data['data'] = json_encode($data);
@@ -338,6 +372,22 @@ class Scrapy
             ), 
             'headers'=>$http_response_header
         );
+    }
+    
+    function getParserTask() {
+        $url = $this->server . '/parser.php?get';
+        $a_task = @file_get_contents($url);
+        $task = unserialize($a_task);
+        if (!empty($task) && is_array($task)) {
+            $this->task = $task;
+            return true;
+        } else {
+            if(empty($task)) {
+                $this->log("cannot get task : $url", "error");
+                exit;
+            }
+        }
+        $this->data['gid'] = $this->task['gid'];
     }
     
     function getTask() {

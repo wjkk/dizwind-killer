@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("Asia/Shanghai");
 ini_set('xdebug.var_display_max_children', 128000 );//xdebug.var_display_max_children Type: integer, Default value: 128
 ini_set('xdebug.var_display_max_data', 512000 );//Type: integer, Default value: 512
 ini_set('xdebug.var_display_max_depth', 3000);//Type: integer, Default value: 3
@@ -14,7 +15,6 @@ class Reciver
         $dbname = 'test';
         $username = 'root';
         $password = '';
-        $options = 'localhost';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
         $this->sites = array(
@@ -28,6 +28,7 @@ class Reciver
             '108' => 'zoopda',
             '109' => 'weimei',
             '110' => 'oabt',
+            '111' => '1lou',
         );
         $this->urls = array(
             '101' => 'diypda',
@@ -40,6 +41,7 @@ class Reciver
             '108' => 'zoopda',
             '109' => 'http://f1.avzcy.info/bbs/',
             '110' => 'http://oabt.org/',
+            '111' => 'http://bbs.1lou.com/',
         );
     }
     
@@ -68,7 +70,7 @@ class Reciver
         foreach ($datas->data as $data) {
             //if(!isset($data->title) || strlen($data->title) <= 3) {
             //    continue;
-            //}
+            //} 
             
             $param['gid'] = isset($data->gid) ? $data->gid : '';
             $param['href'] = isset($data->href) ? $data->href : '';
@@ -83,6 +85,7 @@ class Reciver
             $param['ed2k'] = isset($data->ed2k) ? $data->ed2k : '';
             $param['duration'] = isset($data->duration) ? $data->duration : '';
             $param['file_size'] = isset($data->file_size) ? $data->file_size : '';
+            $param['create_time'] = date('Y-m-d h:i:s');
             if (strpos($param['href'], 'htt') !==0 ) {
                 $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";
             }
@@ -117,9 +120,10 @@ class Reciver
     
     private function updateThreadContent($gid, $content)
     {
-        $sql = "UPDATE `dizwind` SET `content`=?, `status`=0 WHERE `gid`=?";
+        $sql = "UPDATE `dizwind` SET `content`=?, `status`=4 WHERE `gid`=?";
         $stm = $this->db->prepare($sql);
         $result = false;
+        $content = str_replace('<div><a href="http://download.wuji.com/wuji/setup/setup_48.exe" target="_blank"><img src="http://files.btbbt.com/data/attachment/forum/201212/21/13311498b0wgpp1g118lpb.gif" border="0"></a></div>', '', str_replace('<div class="a_pt"><a href="http://download.wuji.com/wuji/setup/setup_81.exe" target="_blank"><img src="http://files.1lou.com/data/attachment/forum/201212/21/133114xbt6bwvdrrbyw4ym.jpg" border="0"></a></div>', '', str_replace('<img file=', '<img src=', $content)));
         if( $stm && $stm->execute(array($content, $gid))) {
             $result = $stm->rowCount();
         }
