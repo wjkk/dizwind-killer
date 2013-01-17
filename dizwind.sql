@@ -41,6 +41,12 @@ CREATE TABLE `dizwind` (
   `numtop` int(10) unsigned DEFAULT NULL,
   `serie_title` varchar(200) DEFAULT NULL,
   `forum` varchar(50) DEFAULT NULL,
+  `channel` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `gid` (`gid`) USING BTREE,
+  KEY `title` (`title`,`create_time`) USING BTREE,
+  KEY `site_id` (`site_id`) USING BTREE,
+  KEY `status` (`status`)
   PRIMARY KEY (`id`),
   UNIQUE KEY `gid` (`gid`) USING BTREE,
   KEY `title` (`title`,`create_time`) USING BTREE,

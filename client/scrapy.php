@@ -12,6 +12,7 @@ class Scrapy
     public $endKeyValue = null;
     public $newEndKeyValue = null;
     public $forum = 0;
+    public $channel = 0;
     public $server = "http://www.faniao.com/dizwind";
         
     function parser() {
@@ -68,9 +69,16 @@ class Scrapy
         
         foreach ($this->task['url'] as $forum => $url) {
             $this->forum = $forum;
-            $this->scrapyUrl($url);
-            if ($this->isLatest) {
-                break;
+            if (is_array($url)) {
+                foreach ($url as $channel => $herf) {
+                    $this->channel = $channel;
+                    $this->scrapyUrl($herf);
+                }
+            } else {
+                $this->scrapyUrl($url);
+                if ($this->isLatest) {
+                    break;
+                }
             }
         }
         if ( !$this->task['nocache'] ) {
@@ -219,7 +227,8 @@ class Scrapy
             } else {
                 $header .= "Host: www.baidu.com\r\n";
             }
-            $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
+            $header .= "Pragma: no-cache\r\n";
+            $header .= "User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:18.0) Gecko/20100101 Firefox/18.0\r\n";
             if (isset($this->task['compress']) && $this->task['compress']) {
                 $this->url = "compress.zlib://{$this->url}";
             }

@@ -31,6 +31,7 @@ class Reciver
             '111' => '1lou',
             '112' => 'zhishu',
             '113' => 'douban',
+            '114' => 'cntv',
         );
         $this->urls = array(
             '101' => 'diypda',
@@ -46,6 +47,7 @@ class Reciver
             '111' => 'http://bbs.1lou.com/',
             '112' => 'http://top.baidu.com/category/',
             '113' => 'http://movie.douban.com/tv/calendar/',
+            '114' => 'http://tv.cntv.cn/epg/',
         );
     }
     
@@ -93,6 +95,7 @@ class Reciver
             $param['numtop'] = isset($data->numtop) ? $data->numtop : '';
             $param['forum'] = isset($data->forum) ? $data->forum : '';
             $param['serie_title'] = isset($data->serie_title) ? trim($data->serie_title) : '';
+            $param['channel'] = isset($data->channel) ? $data->channel : '';
             $param['create_time'] = date('Y-m-d h:i:s');
             if (strpos($param['href'], 'htt') !==0 ) {
                 $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";

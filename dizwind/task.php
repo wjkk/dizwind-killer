@@ -418,6 +418,42 @@ class Task
             //'endkey' => 'reply_time',
             //'convert' => 'GBK',
         );
+
+        $channels = array('cctv1');
+        $maxPromoDay = 7;
+        $cntvPromoDays = array();
+        for ($i = 0; $i <= $maxPromoDay; $i++) {
+            $day = date('Y-m-d', time() + $i*24*3600);
+            foreach ($channels as $channel) {
+                $cntvPromoDays[$day][$channel] = "http://tv.cntv.cn/index.php?action=epg-list&date={$day}&channel={$channel}";
+            }
+        }
+        $this->listTask[] = array(
+            'site' => 'cntv',                                                 
+            'site_id' => '114',
+            'hrefs' => $cntvPromoDays,
+            'path' => "div[class=content_c] dl dd",
+            'compress' => 'compress.zlib://',
+            'cleanrequest' => false, 
+            'nocache' => true,
+            'list' => array(
+                'href' => "j('a', 'href', -1)",
+                'title' => "j('a', 'innertext', -1)",
+                'thread_id' => 's(round((microtime(true)*10000)))', 
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            'host' => '	tv.cntv.cn',
+            //'endkey' => 'reply_time',
+            //'convert' => 'GBK',
+        );
+        
+        
+        
+        
+        
+        
     }
 }
 ?>
