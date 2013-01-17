@@ -39,6 +39,7 @@ CREATE TABLE `dizwind` (
   `retry_time` int(11) DEFAULT '0',
   `total` bigint(20) unsigned DEFAULT NULL,
   `numtop` int(10) unsigned DEFAULT NULL,
+  `serie_title` varchar(200) DEFAULT NULL,
   `forum` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `gid` (`gid`) USING BTREE,

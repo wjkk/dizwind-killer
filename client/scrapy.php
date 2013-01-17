@@ -148,14 +148,14 @@ class Scrapy
                 if (isset($this->task['convert']) && $this->task['convert'] && ($key=="title" || $key == 'author' || $key == 'action')) {
                     $param_value = mb_convert_encoding($param_value, 'UTF-8', $this->task['convert']);
                 }
-                $item[$key] = $param_value;
+                $item[$key] = trim($param_value);
             }
             if (isset($item['title']) && empty($item['title'])) {
                 continue;
             }
 
             if (!isset($item['reply_time']) || empty($item['reply_time'])) {
-                $this->log("no reply_time, did not unset", "error");
+                //$this->log("no reply_time, did not unset", "error");
                 //unset($item);
                 //continue;
             }
@@ -175,8 +175,8 @@ class Scrapy
                 $this->scrapyed[$item['thread_id']] = true;
             }
             $item['href'] = str_replace(array('&amp;', '&'), '&', $item['href']);
+            $item['forum'] = $this->forum;
             $data[$item['thread_id']] = $item;
-            $data['forum'] = $this->forum;
             unset($item);
         }
         $this->list['type'] = $this->task['type'];

@@ -384,13 +384,39 @@ class Task
                 'title' => "j('a[class=list-title]', 'innertext')",
                 'total' => "j('span', 'innertext', -1)",
                 'numtop' => "j('span', 'innertext', 0)",
-                'thread_id' => 's($item["numtop"], "000", $item["total"])',
-                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'thread_id' => 's($item["numtop"], $item["total"])',
+                'gid' => 's($this->task["site_id"], "-", round((microtime(true)*10000)))',
                 'site_id' => 's($this->task["site_id"])',
                 'site' => 's($this->task["site"])',
             ),
             //'endkey' => 'reply_time',
             'convert' => 'GBK',
+        );
+
+        $maxPromoDay = 15;
+        $dbPromoDays = array();
+        for ($i = 0; $i <= $maxPromoDay; $i++) {
+            $day = date('Ymd', time()+$i*24*3600);
+            $dbPromoDays[$day] = "http://movie.douban.com/tv/calendar/{$day}/";
+        }
+        $this->listTask[] = array(
+            'site' => 'douban',                                                 
+            'site_id' => '113',
+            'hrefs' => $dbPromoDays,
+            'path' => "table[class=series_list] tbody tr",
+            'cleanrequest' => true,
+            'nocache' => true,
+            'list' => array(
+                'href' => "j('a', 'href', 0)",
+                'title' => "j('a', 'innertext', 0)",
+                'serie_title' => "j('td[class=gray]', 'innertext')",
+                'thread_id' => 'r("/\/([0-9]+)\//", $item["href"])', 
+                'gid' => 's($this->task["site_id"], "-", round((microtime(true)*10000)))',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            //'endkey' => 'reply_time',
+            //'convert' => 'GBK',
         );
     }
 }
