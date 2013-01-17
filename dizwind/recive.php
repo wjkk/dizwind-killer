@@ -29,6 +29,7 @@ class Reciver
             '109' => 'weimei',
             '110' => 'oabt',
             '111' => '1lou',
+            '112' => 'zhishu',
         );
         $this->urls = array(
             '101' => 'diypda',
@@ -42,6 +43,7 @@ class Reciver
             '109' => 'http://f1.avzcy.info/bbs/',
             '110' => 'http://oabt.org/',
             '111' => 'http://bbs.1lou.com/',
+            '112' => 'http://top.baidu.com/category/',
         );
     }
     
@@ -85,6 +87,9 @@ class Reciver
             $param['ed2k'] = isset($data->ed2k) ? $data->ed2k : '';
             $param['duration'] = isset($data->duration) ? $data->duration : '';
             $param['file_size'] = isset($data->file_size) ? $data->file_size : '';
+            $param['total'] = isset($data->total) ? $data->total : '';
+            $param['numtop'] = isset($data->numtop) ? $data->numtop : '';
+            $param['forum'] = isset($data->forum) ? $data->forum : '';
             $param['create_time'] = date('Y-m-d h:i:s');
             if (strpos($param['href'], 'htt') !==0 ) {
                 $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";

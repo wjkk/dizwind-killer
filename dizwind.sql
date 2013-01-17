@@ -27,20 +27,25 @@ CREATE TABLE `dizwind` (
   `title` varchar(255) DEFAULT NULL,
   `author` varchar(40) DEFAULT NULL,
   `action` varchar(40) DEFAULT NULL,
-  `thread_id` varchar(40) DEFAULT NULL,
+  `thread_id` bigint(40) DEFAULT NULL,
   `reply_time` datetime DEFAULT NULL,
-  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` datetime DEFAULT NULL,
   `content` longtext,
-  `status` tinyint(4) DEFAULT '1' COMMENT '0:完成 1:待补充 2:隐藏',
+  `status` tinyint(4) DEFAULT '1' COMMENT '0:完成 1:待补充 2:隐藏 4:待处理',
   `mag` varchar(500) DEFAULT NULL,
   `ed2k` varchar(500) DEFAULT NULL,
   `duration` varchar(100) DEFAULT NULL,
   `file_size` varchar(100) DEFAULT NULL,
+  `retry_time` int(11) DEFAULT '0',
+  `total` bigint(20) unsigned DEFAULT NULL,
+  `numtop` int(10) unsigned DEFAULT NULL,
+  `forum` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `gid` (`gid`) USING BTREE,
   KEY `title` (`title`,`create_time`) USING BTREE,
-  KEY `site_id` (`site_id`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=49563 DEFAULT CHARSET=utf8;
+  KEY `site_id` (`site_id`) USING BTREE,
+  KEY `status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=178894 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of dizwind

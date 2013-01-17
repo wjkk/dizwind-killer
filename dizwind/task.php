@@ -353,6 +353,45 @@ class Task
             'content' => array('text' =>"j('td[class=t_f]', 'innertext')"),
             'convert' => 'GBK',
         );
+
+        $this->listTask[] = array(
+            'site' => 'zhishu',                                                 
+            'site_id' => '112',
+            'hrefs' => array(
+                '349' => "http://top.baidu.com/buzz?b=349",
+                '350' => "http://top.baidu.com/buzz?b=350",
+                '351' => "http://top.baidu.com/buzz?b=351",
+                '448' => "http://top.baidu.com/buzz?b=448",
+                '452' => "http://top.baidu.com/buzz?b=452",
+                '453' => "http://top.baidu.com/buzz?b=453",
+                '439' => "http://top.baidu.com/buzz?b=439",
+                '440' => "http://top.baidu.com/buzz?b=440",
+                '441' => "http://top.baidu.com/buzz?b=441",
+                '368' => "http://top.baidu.com/buzz?b=368",
+                '369' => "http://top.baidu.com/buzz?b=369",
+                '369' => "http://top.baidu.com/buzz?b=442",
+                '369' => "http://top.baidu.com/buzz?b=443",
+                '369' => "http://top.baidu.com/buzz?b=444",
+                '369' => "http://top.baidu.com/buzz?b=445",
+                '369' => "http://top.baidu.com/buzz?b=446",
+                '369' => "http://top.baidu.com/buzz?b=447",
+            ),   
+            'path' => "table[class=list-table] tr",
+            'cleanrequest' => true,
+            'nocache' => true,
+            'list' => array(
+                'href' => "j('a[class=list-title]', 'href')",
+                'title' => "j('a[class=list-title]', 'innertext')",
+                'total' => "j('span', 'innertext', -1)",
+                'numtop' => "j('span', 'innertext', 0)",
+                'thread_id' => 's($item["numtop"], "000", $item["total"])',
+                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
+                'site_id' => 's($this->task["site_id"])',
+                'site' => 's($this->task["site"])',
+            ),
+            //'endkey' => 'reply_time',
+            'convert' => 'GBK',
+        );
     }
 }
 ?>

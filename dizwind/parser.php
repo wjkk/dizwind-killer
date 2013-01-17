@@ -5,9 +5,13 @@ ini_set('xdebug.var_display_max_data', 512000 );//Type: integer, Default value: 
 ini_set('xdebug.var_display_max_depth', 3000);//Type: integer, Default value: 3
 
 $Parser = new Parser();
-$Parser->get();
+if ($_GET['a'] == 'get') {
+    $Parser->get();
+} else if ($_GET['a'] == 'recive') {
+    $Parser->recive();
+}
 
-class Reciver
+class Parser
 {
     public function __construct()
     {
@@ -16,38 +20,11 @@ class Reciver
         $username = 'root';
         $password = 'lianshan3';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
-        
-        $this->sites = array(
-            '101' => 'diypda',
-            '102' => 'maxpda',
-            '103' => 'hiapk',
-            '104' => 'in189',
-            '105' => 'gfan',
-            '106' => 'rayi',
-            '107' => 'weiphone',
-            '108' => 'zoopda',
-            '109' => 'weimei',
-            '110' => 'oabt',
-            '111' => '1lou',
-        );
-        $this->urls = array(
-            '101' => 'diypda',
-            '102' => 'maxpda',
-            '103' => 'hiapk',
-            '104' => 'in189',
-            '105' => 'gfan',
-            '106' => 'rayi',
-            '107' => 'weiphone',
-            '108' => 'zoopda',
-            '109' => 'http://f1.avzcy.info/bbs/',
-            '110' => 'http://oabt.org/',
-            '111' => 'http://bbs.1lou.com/',
-        );
     }
     
     public function get()
     {
-        $query = $this->db->prepare("SELECT `gid`, content` FROM `dizwind` WHERE `status`=4 AND site_id=111 ORDER BY RAND() DESC limit 1");
+        $query = $this->db->prepare("SELECT `gid`, `content` FROM `dizwind` WHERE site_id='111' AND `status`=4  AND retry_time < 4 ORDER BY RAND() DESC limit 1");
         $query->execute();
         $thread = $query->fetch(); 
         $task['gid'] = $thread['gid'];
@@ -66,18 +43,26 @@ class Reciver
             die();
         }
         $data = json_decode($_POST['data']);
-        if (empty($datas)) {
+        if (empty($data)) {
             echo '1002';
             die();
         }
-        
-        foreach ($data['pics'] as $pic) {
-            $param['gid'] = $data['gid'];
-            $param['image'] = $pic;
-            $this->insert($param);
-			unset($param);
+        echo $data->gid;
+        $flag = 1;
+        if (isset($data->pics) && !empty($data->pics)) {
+            $flag = 0;
+            foreach ($data->pics as $pic) {
+                $param = array();
+                $param['gid'] = $data->gid;
+                $param['image'] = $pic->new;
+                $param['original'] = $pic->old;
+                $this->insert($param);
+    		unset($param);
+            }
         }
-        $this->updateThreadContent($data['gid']);
+        
+        $this->updateThreadContent($data->gid, $flag);
+
         die();
     }
     
@@ -99,9 +84,14 @@ class Reciver
         return $result; 
     }
     
-    private function updateThreadContent($gid)
-    {
-        $sql = "UPDATE `dizwind` SET `status`=0 WHERE `gid`=?";
+    private function updateThreadContent($gid, $flag)
+    { 
+        if ($flag == '1') {
+            $sql = "UPDATE `dizwind` SET `status`={$flag}, retry_time = retry_time + 1 WHERE `gid`=?";
+	} else {
+	    $sql = "UPDATE `dizwind` SET `status`={$flag} WHERE `gid`=?";
+	}
+        
         $stm = $this->db->prepare($sql);
         $result = false;
         if( $stm && $stm->execute(array($gid))) {

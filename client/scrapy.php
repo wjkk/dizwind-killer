@@ -11,6 +11,7 @@ class Scrapy
     public $isLatest = false;
     public $endKeyValue = null;
     public $newEndKeyValue = null;
+    public $forum = 0;
     public $server = "http://www.faniao.com/dizwind";
         
     function parser() {
@@ -44,7 +45,7 @@ class Scrapy
         $this->isLatest = false;
         $this->newEndKeyValue = null;
         
-        if (file_exists("cursor/{$this->site}_saved.php")) {
+        if ( !$this->task['nocache'] && file_exists("cursor/{$this->site}_saved.php")) {
             require_once("cursor/{$this->site}_saved.php");
             $this->scrapyed = $scrapyed;
         } else {
@@ -53,7 +54,9 @@ class Scrapy
         
         //by comment
         if ($this->task['type'] == 'list') {
-            if (!isset($this->task['url']) || empty($this->task['url'])) {
+            if (isset($this->task["hrefs"]) && is_array($this->task["hrefs"]) && !empty($this->task["hrefs"])) {
+                 $this->task['url'] = $this->task["hrefs"];
+            } elseif (!isset($this->task['url']) || empty($this->task['url'])) {
                 list($href, $start, $end, $step) = $this->task['href'];
                 for($i=$start; $i<=$end; $i=$i+$step) {
                     $this->task['url'][] = sprintf($href, $i);
@@ -63,13 +66,16 @@ class Scrapy
             $this->task['url'][] = $this->task['href'];
         }
         
-        foreach ($this->task['url'] as $url) {
+        foreach ($this->task['url'] as $forum => $url) {
+            $this->forum = $forum;
             $this->scrapyUrl($url);
             if ($this->isLatest) {
                 break;
             }
         }
-        @file_put_contents("cursor/{$this->site}_saved.php", '<?php $scrapyed='.var_export($this->scrapyed, true) . "; ?>");
+        if ( !$this->task['nocache'] ) {
+            @file_put_contents("cursor/{$this->site}_saved.php", '<?php $scrapyed='.var_export($this->scrapyed, true) . "; ?>");
+        }
     }
     
     function scrapyUrl($url) {
@@ -144,6 +150,9 @@ class Scrapy
                 }
                 $item[$key] = $param_value;
             }
+            if (isset($item['title']) && empty($item['title'])) {
+                continue;
+            }
 
             if (!isset($item['reply_time']) || empty($item['reply_time'])) {
                 $this->log("no reply_time, did not unset", "error");
@@ -167,6 +176,7 @@ class Scrapy
             }
             $item['href'] = str_replace(array('&amp;', '&'), '&', $item['href']);
             $data[$item['thread_id']] = $item;
+            $data['forum'] = $this->forum;
             unset($item);
         }
         $this->list['type'] = $this->task['type'];
