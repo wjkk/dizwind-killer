@@ -47,11 +47,6 @@ CREATE TABLE `dizwind` (
   KEY `title` (`title`,`create_time`) USING BTREE,
   KEY `site_id` (`site_id`) USING BTREE,
   KEY `status` (`status`)
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `gid` (`gid`) USING BTREE,
-  KEY `title` (`title`,`create_time`) USING BTREE,
-  KEY `site_id` (`site_id`) USING BTREE,
-  KEY `status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=178894 DEFAULT CHARSET=utf8;
 
 -- ----------------------------

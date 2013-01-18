@@ -151,8 +151,18 @@ class Scrapy
             $item = array();
             foreach ($this->task['list'] as $key => $para) {
                 $param_value = null;
-                $fun = "\$param_value = \$this->$para;";
-                eval($fun);
+                if (is_array($para)) {
+                    while ($par = array_shift($para)) {
+                        $fun = "\$param_value = \$this->$par;";
+                        eval($fun);
+                        if ($param_value) {
+                            break;
+                        }
+                    }
+                } else {
+                    $fun = "\$param_value = \$this->$para;";
+                    eval($fun);
+                }
                 if (isset($this->task['convert']) && $this->task['convert'] && ($key=="title" || $key == 'author' || $key == 'action')) {
                     $param_value = mb_convert_encoding($param_value, 'UTF-8', $this->task['convert']);
                 }
@@ -184,6 +194,7 @@ class Scrapy
             }
             $item['href'] = str_replace(array('&amp;', '&'), '&', $item['href']);
             $item['forum'] = $this->forum;
+            $item['channel'] = $this->channel;
             $data[$item['thread_id']] = $item;
             unset($item);
         }
@@ -438,11 +449,20 @@ class Scrapy
     }
 
     function j($path, $para, $posi = 0) {
-        $a = $this->listItem->find($path, $posi);
-        if (is_object($a)) {
-            return $a->$para;
+        if ($path) {
+            $a = $this->listItem->find($path, $posi);
+            if (is_object($a)) {
+                return $a->$para;
+            } else {
+                return '';
+            }
         } else {
-            return '';
+            $a = $this->listItem;
+            if (is_object($a)) {
+                return $a->$para;
+            } else {
+                return '';
+            }
         }
     }
     
