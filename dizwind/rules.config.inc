@@ -348,6 +348,7 @@ $listTask['113'] = array(
 
 function saveDoubanPromo($param)
 {
+    $param['forum'] = date("Y-m-d", strtotime($param['forum']));
     $param['title'] = str_replace('第', ' 第', $param['title']);
     $param['title'] = str_replace('  第', ' 第', $param['title']);
     $param['title'] = str_replace('   第', ' 第', $param['title']);
@@ -364,10 +365,8 @@ function saveDoubanPromo($param)
 
 $channels = array('cctv1', 'cctv4', 'cctv8', 'cctv11', 'cctv14', 'anhui', 'btv1', 'chongqing', 'shanghai', 'dongnan', 'guangdong', 'guangxi', 'gansu', 'guizhou', 'hebei', 'henan', 'heilongjiang', 'hubei', 'hunan', 'jilin', 'jiangsu', 'jiangxi', 'liaoning', 'luyou', 'neimenggu', 'ningxia', 'qinghai', 'shandong', 'shandongjiaoyu', 'shenzhenweishi', 'shanxi2', 'shanxi1', 'sichuan', 'tianjin', 'xizang', 'xiamenweishi', 'xinjiang', 'yanbiantv', 'yunnan', 'zhejiang', 'btv4', 'tianjin1', 'guangxiz', 'xinjiang');
 $maxPromoDay = 6;
-
-$channels = array('cctv1');
-$maxPromoDay = 1;
-
+//$channels = array('cctv1');
+//$maxPromoDay = 1;
 $cntvPromoDays = array();
 for ($i = 0; $i <= $maxPromoDay; $i++) {
     $day = date('Y-m-d', time() + $i*24*3600);
@@ -404,6 +403,10 @@ function saveCntv($param)
     if (strpos($param['title'], '电视剧') === false) {
         return array();
     }
+    if (strpos($param['title'], '前情提要') !== false) {
+        return array();
+    }
+    
     $string = $param['title'];
     preg_match("/([0-9:]+) (.*)：(.*)/", $string, $tmp);
     if (isset($tmp[1]) && isset($tmp[3])) {

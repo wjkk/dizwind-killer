@@ -69,8 +69,6 @@ class Reciver
             
             if (isset($this->listTask[$param['site_id']]['beforeSave'])) {
                 eval("\$param = " . $this->listTask[$param['site_id']]['beforeSave'] . "(\$param);");
-                var_dump($param);
-                die();
             }
             if (empty($param)) {
                 continue;
