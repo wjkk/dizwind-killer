@@ -100,7 +100,7 @@ class Reciver
             if (strpos($param['href'], 'htt') !==0 ) {
                 $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";
             }
-            
+            $param['title'] = str_replace("µÚ", ' µÚ', $param['title']);
     		if($this->insert($param)) {
     			    echo "0";
     		} else {

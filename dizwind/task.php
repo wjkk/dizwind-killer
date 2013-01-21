@@ -78,6 +78,7 @@ class Task
         $password = '';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         
+        /*
         $this->listTask[] = array(
             'type' => 'list',
             'site' => 'diypda',
@@ -353,6 +354,7 @@ class Task
             'content' => array('text' =>"j('td[class=t_f]', 'innertext')"),
             'convert' => 'GBK',
         );
+        */
 
         $this->listTask[] = array(
             'site' => 'zhishu',                                                 
@@ -419,36 +421,8 @@ class Task
             //'convert' => 'GBK',
         );
 
-        $channels = array('cctv1');
-        $maxPromoDay = 7;
-        $cntvPromoDays = array();
-        for ($i = 0; $i <= $maxPromoDay; $i++) {
-            $day = date('Y-m-d', time() + $i*24*3600);
-            foreach ($channels as $channel) {
-                $cntvPromoDays[$day][$channel] = "http://tv.cntv.cn/index.php?action=epg-list&date={$day}&channel={$channel}";
-            }
-        }
-        $this->listTask[] = array(
-            'site' => 'cntv',                                                 
-            'site_id' => '114',
-            'hrefs' => $cntvPromoDays,
-            'path' => "div[class=content_c] dl dd",
-            'compress' => 'compress.zlib://',
-            'cleanrequest' => false, 
-            'nocache' => true,
-            'list' => array(
-                'href' => "j('a', 'href', -1)",
-                'title' => "j('a', 'innertext', -1)",
-                'thread_id' => 's(round((microtime(true)*10000)))', 
-                'gid' => 's($this->task["site_id"], "-", $item["thread_id"])',
-                'site_id' => 's($this->task["site_id"])',
-                'site' => 's($this->task["site"])',
-            ),
-            'host' => '	tv.cntv.cn',
-            //'endkey' => 'reply_time',
-            //'convert' => 'GBK',
-        );
-                $channels = array('cctv1', 'cctv4', 'cctv8', 'cctv11', 'cctv14', 'anhui', 'btv1', 'chongqing', 'shanghai', 'dongnan', 'guangdong', 'guangxi', 'gansu', 'guizhou', 'hebei', 'henan', 'heilongjiang', 'hubei', 'hunan', 'jilin', 'jiangsu', 'jiangxi', 'liaoning', 'luyou', 'neimenggu', 'ningxia', 'qinghai', 'shandong', 'shandongjiaoyu', 'shenzhenweishi', 'shanxi2', 'shanxi1', 'sichuan', 'tianjin', 'xizang', 'xiamenweishi', 'xinjiang', 'yanbiantv', 'yunnan', 'zhejiang', 'btv4', 'tianjin1', 'guangxiz', 'xinjiang', 'xinjiang', 'xinjiang', 'xinjiang');
+
+        $channels = array('cctv1', 'cctv4', 'cctv8', 'cctv11', 'cctv14', 'anhui', 'btv1', 'chongqing', 'shanghai', 'dongnan', 'guangdong', 'guangxi', 'gansu', 'guizhou', 'hebei', 'henan', 'heilongjiang', 'hubei', 'hunan', 'jilin', 'jiangsu', 'jiangxi', 'liaoning', 'luyou', 'neimenggu', 'ningxia', 'qinghai', 'shandong', 'shandongjiaoyu', 'shenzhenweishi', 'shanxi2', 'shanxi1', 'sichuan', 'tianjin', 'xizang', 'xiamenweishi', 'xinjiang', 'yanbiantv', 'yunnan', 'zhejiang', 'btv4', 'tianjin1', 'guangxiz', 'xinjiang');
         $maxPromoDay = 6;
         $cntvPromoDays = array();
         for ($i = 0; $i <= $maxPromoDay; $i++) {
@@ -478,8 +452,6 @@ class Task
             //'endkey' => 'reply_time',
             //'convert' => 'GBK',
         );
-        */
-        
     }
 }
 ?>
