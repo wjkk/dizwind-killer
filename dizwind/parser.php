@@ -15,11 +15,8 @@ class Parser
 {
     public function __construct()
     {
-        $host = 'localhost';
-        $dbname = 'dizwind';
-        $username = 'root';
-        $password = 'lianshan3';
-        $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
+        require_once("config.inc");
+        $this->db = new PDO("mysql:host={$db['host']};dbname={$db['dbname']}", $db['username'], $db['password'], array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
     }
     
     public function get()

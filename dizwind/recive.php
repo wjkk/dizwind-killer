@@ -11,11 +11,8 @@ class Reciver
 {
     public function __construct()
     {
-        $host = 'localhost';
-        $dbname = 'test';
-        $username = 'root';
-        $password = '';
-        $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
+        require_once("config.inc");
+        $this->db = new PDO("mysql:host={$db['host']};dbname={$db['dbname']}", $db['username'], $db['password'], array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
         require_once("rules.config.inc");
         $this->listTask = isset($listTask) ? $listTask : array();
         $this->contentTask = isset($contentTask) ? $contentTask : array();
