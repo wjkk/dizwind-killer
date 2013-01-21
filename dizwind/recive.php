@@ -16,39 +16,9 @@ class Reciver
         $username = 'root';
         $password = '';
         $this->db = new PDO("mysql:host={$host};dbname={$dbname}", $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
-        
-        $this->sites = array(
-            '101' => 'diypda',
-            '102' => 'maxpda',
-            '103' => 'hiapk',
-            '104' => 'in189',
-            '105' => 'gfan',
-            '106' => 'rayi',
-            '107' => 'weiphone',
-            '108' => 'zoopda',
-            '109' => 'weimei',
-            '110' => 'oabt',
-            '111' => '1lou',
-            '112' => 'zhishu',
-            '113' => 'douban',
-            '114' => 'cntv',
-        );
-        $this->urls = array(
-            '101' => 'diypda',
-            '102' => 'maxpda',
-            '103' => 'hiapk',
-            '104' => 'in189',
-            '105' => 'gfan',
-            '106' => 'rayi',
-            '107' => 'weiphone',
-            '108' => 'zoopda',
-            '109' => 'http://f1.avzcy.info/bbs/',
-            '110' => 'http://oabt.org/',
-            '111' => 'http://bbs.1lou.com/',
-            '112' => 'http://top.baidu.com/category/',
-            '113' => 'http://movie.douban.com/tv/calendar/',
-            '114' => 'http://tv.cntv.cn/epg/',
-        );
+        require_once("rules.config.inc");
+        $this->listTask = isset($listTask) ? $listTask : array();
+        $this->contentTask = isset($contentTask) ? $contentTask : array();
     }
     
     public function recive()
@@ -63,7 +33,6 @@ class Reciver
             die();
         }
         
-        $urls = array();
         if (isset($datas->type) && $datas->type == 'content') {
             if($this->updateThreadContent($datas->gid, $datas->data->text)) {
                 echo "0";
@@ -86,7 +55,7 @@ class Reciver
             $param['thread_id'] = isset($data->thread_id) ? intval($data->thread_id) : '';
             $param['reply_time'] = isset($data->reply_time) ? $data->reply_time : '';
             $param['site_id'] = isset($data->site_id) ? intval($data->site_id) : '';
-            $param['site'] = isset($data->site_id) ? $this->sites[$data->site_id] : '';
+            $param['site'] = isset($data->site_id) ? $this->listTask[$data->site_id]['site'] : '';
             $param['mag'] = isset($data->mag) ? $data->mag : '';
             $param['ed2k'] = isset($data->ed2k) ? $data->ed2k : '';
             $param['duration'] = isset($data->duration) ? $data->duration : '';
@@ -98,15 +67,24 @@ class Reciver
             $param['channel'] = isset($data->channel) ? $data->channel : '';
             $param['create_time'] = date('Y-m-d h:i:s');
             if (strpos($param['href'], 'htt') !==0 ) {
-                $param['href'] = "{$this->urls[$param['site_id']]}{$param['href']}";
+                $param['href'] = "{$this->listTask[$param['site_id']]['site_url']}{$param['href']}";
             }
-            $param['title'] = str_replace("µÚ", ' µÚ', $param['title']);
-    		if($this->insert($param)) {
-    			    echo "0";
-    		} else {
-    			    echo "1003";
-    		}
-			unset($param);
+            
+            if (isset($this->listTask[$param['site_id']]['beforeSave'])) {
+                eval("\$param = " . $this->listTask[$param['site_id']]['beforeSave'] . "(\$param);");
+                var_dump($param);
+                die();
+            }
+            if (empty($param)) {
+                continue;
+            }
+            
+    	    if($this->insert($param)) {
+                echo "0";
+            } else {
+                echo "1003";
+            }
+            unset($param);
         }
         die();
     }
